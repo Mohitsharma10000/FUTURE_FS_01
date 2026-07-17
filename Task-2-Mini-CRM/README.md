@@ -1,130 +1,22 @@
-# Mini CRM — Lead Management
+# Task 2 - Client Lead Management System (Mini CRM)
 
-Full-stack Mini CRM per spec: Node.js/Express + MongoDB backend, React (Vite) frontend, JWT auth, bcrypt hashing.
-
-> **Note:** This code is designed to run **locally** (or on your own host). It does not run inside the Lovable preview because Lovable's runtime is TanStack Start on Cloudflare Workers — no Node process, no MongoDB.
-
-## Folder structure
-
-```
-mini-crm/
-├── backend/     # Express + Mongoose API
-├── frontend/    # React (Vite) admin dashboard + public contact form
-└── README.md
-```
-
-## Prerequisites
-
-- Node.js 18+
-- MongoDB running locally (`mongodb://127.0.0.1:27017`) or a MongoDB Atlas URI
-
-## Setup
-
-### 1. Backend
-
-```bash
-cd backend
-cp .env.example .env       # then edit MONGO_URI and JWT_SECRET
-npm install
-npm run seed               # (optional) create sample admin + leads
-npm run dev                # http://localhost:5000
-```
-
-Seeded admin (if you ran `npm run seed`):
-- Email: `admin@example.com`
-- Password: `admin12345`
-
-Override with `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` env vars.
-
-### 2. Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev                # http://localhost:5173
-```
-
-Vite is configured to proxy `/api/*` → `http://localhost:5000`, so no CORS setup needed for local dev.
-
-## Environment (`backend/.env`)
-
-```
-PORT=5000
-NODE_ENV=development
-MONGO_URI=mongodb://127.0.0.1:27017/mini_crm
-JWT_SECRET=change_me_to_a_long_random_string
-JWT_EXPIRES_IN=7d
-COOKIE_SECURE=false
-CORS_ORIGIN=http://localhost:5173
-```
-
-## API
-
-All admin routes require a JWT (sent via httpOnly cookie automatically by the frontend, or `Authorization: Bearer <token>` header).
-
-### Auth
-
-| Method | Path                 | Auth  | Body                            |
-|--------|----------------------|-------|---------------------------------|
-| POST   | `/api/auth/register` | none  | `{ email, password }`           |
-| POST   | `/api/auth/login`    | none  | `{ email, password }`           |
-| POST   | `/api/auth/logout`   | none  | —                               |
-| GET    | `/api/auth/me`       | admin | —                               |
-
-The **first** registered user becomes `admin`; subsequent registrations default to `sales_rep`.
-
-### Leads
-
-| Method | Path                        | Auth   | Notes                                          |
-|--------|-----------------------------|--------|------------------------------------------------|
-| POST   | `/api/leads`                | public | Rate-limited (10 / 15 min per IP)              |
-| GET    | `/api/leads`                | admin  | Query: `page, limit, q, status, from, to, sort` |
-| GET    | `/api/leads/:id`            | admin  |                                                |
-| PATCH  | `/api/leads/:id/status`     | admin  | `{ status: "new" \| "contacted" \| "converted" }` |
-| POST   | `/api/leads/:id/notes`      | admin  | `{ text }`                                     |
-| GET    | `/api/leads/stats/summary`  | admin  | Totals, by-status, this week, conversion rate  |
-
-### Example: submit a lead
-
-```bash
-curl -X POST http://localhost:5000/api/leads \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Jane Doe","email":"jane@example.com","message":"Interested in a demo"}'
-```
-
-### Example: login and list leads
-
-```bash
-curl -c cookies.txt -X POST http://localhost:5000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@example.com","password":"admin12345"}'
-
-curl -b cookies.txt http://localhost:5000/api/leads
-```
+This folder contains the source code for a Mini CRM application.
 
 ## Features
+- Lead Management
+- Lead Status Updates
+- Notes & Follow-ups
+- Secure Admin Login
+- CRUD Operations
 
-- Public contact form at `/` posts to `/api/leads`
-- Admin login/register at `/login`, `/register`
-- Dashboard (`/dashboard`) with:
-  - Stats widget (total, by status, this week, conversion rate)
-  - Search + status filter + pagination
-  - Color-coded status badges
-- Lead detail (`/leads/:id`) with status change buttons and timestamped notes
-- JWT via httpOnly cookie, bcrypt password hashing
-- Input validation (express-validator), rate limiting on public + auth endpoints
-- Helmet, `express-mongo-sanitize`, `xss-clean` for input hardening
+## Technologies Used
+- React
+- Node.js
+- Express
+- MongoDB
 
-## Deployment notes
+## Live Demo
+https://minicrm-two-ashy.vercel.app/
 
-- **Backend:** Render / Railway / Fly.io. Set env vars from `.env.example`. Use MongoDB Atlas for the DB. Set `COOKIE_SECURE=true` and `CORS_ORIGIN=https://your-frontend.example.com` in production.
-- **Frontend:** Vercel / Netlify. Set the API base URL — either configure a rewrite from `/api/*` to your backend, or replace `BASE` in `frontend/src/services/api.js` with the absolute backend URL and ensure the backend `CORS_ORIGIN` matches.
-
-## Acceptance criteria coverage
-
-- [x] Public form submissions appear in the admin dashboard
-- [x] Admin auth required for lead management; unauthenticated blocked (401 API / redirect UI)
-- [x] Status transitions through `new → contacted → converted`
-- [x] Multiple timestamped notes per lead
-- [x] Centralized error handler with meaningful status codes
-- [x] Passwords hashed with bcrypt; JWT in httpOnly cookie
+## GitHub
+Source code is available in this folder.
