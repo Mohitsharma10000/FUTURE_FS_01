@@ -1,4 +1,8 @@
-const BASE = "/api";
+// In dev, Vite's proxy (vite.config.js) forwards /api -> http://localhost:5000.
+// In production the frontend is usually deployed separately from the backend
+// (e.g. frontend on Vercel, backend on Render/Railway), so set VITE_API_URL
+// to the deployed backend's URL, e.g. https://your-backend.onrender.com/api
+const BASE = import.meta.env.VITE_API_URL || "/api";
 
 async function request(path, opts = {}) {
   const res = await fetch(BASE + path, {
